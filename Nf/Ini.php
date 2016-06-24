@@ -2,10 +2,7 @@
 namespace Nf;
 
 /**
- * Reads an .
- *
- *
- * ini file, handling sections, overwriting...
+ * Reads an .ini file, handling sections, overwriting...
  *
  * @author Julien Ricard
  * @package Nf
@@ -36,7 +33,7 @@ class Ini
      * @throws Exception
      * @return array|boolean
      */
-    public static function parse($filename, $process_sections = false, $section_name = null, $fallback_section_name = null)
+    public static function parse($filename, $processSections = false, $sectionName = null, $fallbackSectionName = null, $toObject = true)
     {
         
         // load the raw ini file
@@ -45,7 +42,7 @@ class Ini
         include($filename);
         $str = ob_get_contents();
         ob_end_clean();
-        $ini = parse_ini_string($str, $process_sections);
+        $ini = parse_ini_string($str, $processSections);
         
         // fail if there was an error while processing the specified ini file
         if ($ini === false) {
@@ -55,7 +52,7 @@ class Ini
         // reset the result array
         self::$result = array();
         
-        if ($process_sections === true) {
+        if ($processSections === true) {
             // loop through each section
             foreach ($ini as $section => $contents) {
                 // process sections contents
@@ -67,23 +64,35 @@ class Ini
         }
         
         // extract the required section if required
-        if ($process_sections === true) {
-            if ($section_name !== null) {
+        if ($processSections === true) {
+            if ($sectionName !== null) {
                 // return the specified section contents if it exists
-                if (isset(self::$result[$section_name])) {
-                    return self::bindArrayToObject(self::$result[$section_name]);
-                } else {
-                    if ($fallback_section_name !== null) {
-                        return self::bindArrayToObject(self::$result[$fallback_section_name]);
+                if (isset(self::$result[$sectionName])) {
+                    if ($toObject) {
+                        return self::bindArrayToObject(self::$result[$sectionName]);
                     } else {
-                        throw new \Exception('Section ' . $section_name . ' not found in the ini file');
+                        return self::$result[$sectionName];
+                    }
+                } else {
+                    if ($fallbackSectionName !== null) {
+                        if ($toObject) {
+                            return self::bindArrayToObject(self::$result[$fallbackSectionName]);
+                        } else {
+                            return self::$result[$fallbackSectionName];
+                        }
+                    } else {
+                        throw new \Exception('Section ' . $sectionName . ' not found in the ini file');
                     }
                 }
             }
         }
         
         // if no specific section is required, just return the whole result
-        return self::bindArrayToObject(self::$result);
+        if ($toObject) {
+            return self::bindArrayToObject(self::$result);
+        } else {
+            return self::$result;
+        }
     }
 
     /**
@@ -174,7 +183,7 @@ class Ini
         return $result;
     }
 
-    private static function bindArrayToObject($array)
+    public static function bindArrayToObject($array)
     {
         $return = new \StdClass();
         foreach ($array as $k => $v) {

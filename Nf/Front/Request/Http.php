@@ -43,6 +43,22 @@ class Http extends AbstractRequest
         return $_SERVER['REQUEST_METHOD'];
     }
 
+    public function isDelete()
+    {
+        if ('DELETE' == $this->getMethod()) {
+            return true;
+        }
+        return false;
+    }
+
+    public function isPut()
+    {
+        if ('PUT' == $this->getMethod()) {
+            return true;
+        }
+        return false;
+    }
+
     public function isPost()
     {
         if ('POST' == $this->getMethod()) {
@@ -106,12 +122,10 @@ class Http extends AbstractRequest
             parse_str(urldecode($post), $array);
             if (empty($json) || !is_array($json)) {
                 return !empty($array) && is_array($array) ? $array : [];
-            }
-            else {
+            } else {
                 return $json;
             }
-        }
-        else {
+        } else {
             return $post;
         }
     }
@@ -123,8 +137,7 @@ class Http extends AbstractRequest
             parse_str(urldecode($this->_put), $array);
             if (empty($json) || !is_array($json)) {
                 return !empty($array) && is_array($array) ? $array : [];
-            }
-            else {
+            } else {
                 return $json;
             }
         } else {

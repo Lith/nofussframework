@@ -39,7 +39,7 @@ class Bootstrap
             if (! empty($_SERVER['HTTP_HOST'])) {
                 // let's check the environment from the http host (and set the other values)
                 list ($localeFromDomain, $versionFromDomain, $environmentFromDomain) = $this->getLocaleAndVersionAndEnvironmentFromDomain($_SERVER['HTTP_HOST'], $urlIni);
-                if(!empty($environmentFromDomain)) {
+                if (!empty($environmentFromDomain)) {
                     $environment = $environmentFromDomain;
                 }
             }
@@ -97,8 +97,7 @@ class Bootstrap
                             }
                             break;
                     }
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -144,8 +143,15 @@ class Bootstrap
         Registry::set('version', $version);
 
         // we use the requested section from the config.ini to load our config
-        $config = Ini::parse(Registry::get('applicationPath') . '/configs/config.ini', true, $locale . '-' . $environment . '-' . $version, 'common');
-        Registry::set('config', $config);
+        Config::init($locale, $environment, $version);
+        Registry::set('config', Config::getInstance());
+                        
+        // parse the variables from the .env file or environment
+        $env = Env::init($locale, $environment, $version);
+        Registry::set('env', Env::getInstance());
+        
+        // create the Settings Object
+        Registry::set('settings', Settings::getInstance());
 
         // let's block the use of index.php
         if (isset($_SERVER['REQUEST_URI']) && in_array($_SERVER['REQUEST_URI'], array(
@@ -221,6 +227,17 @@ class Bootstrap
             Registry::set('environment', $inEnvironment);
             Registry::set('locale', $inLocale);
             Registry::set('version', $inVersion);
+            
+            // we use the requested section from the config.ini to load our config
+            Config::init($inLocale, $inEnvironment, $inVersion);
+            Registry::set('config', Config::getInstance());
+                            
+            // parse the variables from the .env file or environment
+            $env = Env::init($inLocale, $inEnvironment, $inVersion);
+            Registry::set('env', Env::getInstance());
+            
+            // create the Settings Object
+            Registry::set('settings', Settings::getInstance());
 
             $arrParams = array();
 
